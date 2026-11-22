@@ -38,11 +38,11 @@ node bin/banglanorm.mjs --check "docs/*.md"      # exit 1 if not normalized (pre
 
 * **GitHub Pages:** push to `main`, then Settings → Pages → Source: *GitHub Actions*. `.github/workflows/deploy.yml` tests and publishes.
 * **Cloudflare Pages / Netlify / Vercel:** import the repo, no build command, output directory `/` (the `_headers` file adds CSP).
+* **Vercel:** import the repo at vercel.com/new, Framework Preset *Other*, no build command. `vercel.json` sets the security headers.
 * **One file:** `npm i -D esbuild && npm run build:single` → `dist/banglanorm.html` (fonts inlined) for intranet / email.
 
 ## Notes
 
 * Source files write Bengali code points as `\uXXXX` on purpose; keep it that way (editors may re-normalize literal ড় ঢ় য়).
 * Fonts (self-hosted woff2): Noto Sans/Serif Bengali, Hind Siliguri, Inter (SIL OFL).
-* Replace the GitHub link in `index.html` (`#bugLink`) with your repo URL.
 * MIT licensed.
