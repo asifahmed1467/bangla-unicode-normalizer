@@ -1,0 +1,34 @@
+{
+  "name": "banglanorm",
+  "version": "1.0.0",
+  "description": "Bangla Unicode normalizer: fixes ড় ঢ় য় (precomposed vs base+nukta), invisible characters, look-alikes and more. 100% client-side.",
+  "type": "module",
+  "license": "MIT",
+  "main": "src/core.js",
+  "exports": {
+    ".": "./src/core.js"
+  },
+  "bin": {
+    "banglanorm": "bin/banglanorm.mjs"
+  },
+  "files": [
+    "src/core.js",
+    "src/unicode-names.js",
+    "bin"
+  ],
+  "scripts": {
+    "test": "node --test test/core.test.mjs",
+    "serve": "npx --yes serve -l 5173 .",
+    "build:single": "node scripts/build-single.mjs"
+  },
+  "keywords": [
+    "bangla",
+    "bengali",
+    "unicode",
+    "normalization",
+    "nukta"
+  ],
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
