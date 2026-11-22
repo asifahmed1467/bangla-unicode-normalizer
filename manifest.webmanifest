@@ -1,0 +1,11 @@
+{
+  "name": "BanglaNorm — Bangla Unicode Normalizer",
+  "short_name": "BanglaNorm",
+  "description": "Detect and fix inconsistent Bangla Unicode (ড় ঢ় য়, invisible characters, look-alikes). 100% client-side.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f2ec",
+  "theme_color": "#0a7e6e",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
