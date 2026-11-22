@@ -252,18 +252,57 @@ function buildLetters() {
     root.append(ref.card);
   }
 }
+function letterStatus(a, target) {
+  const total = a.precomposed + a.decomposed;
+  if (!total) return { st: 'none', label: t('badgeNone') };
+  if (a.precomposed && a.decomposed) return { st: 'mixed', label: t('badgeMixed') };
+  if ((target === 'precomposed') === !!a.precomposed) return { st: 'consistent', label: t('badgeConsistent') };
+  return { st: 'split', label: a.decomposed ? t('badgeSplit') : t('badgeSingle') };
+}
+function renderSummary() {
+  const box = $('summary');
+  box.replaceChildren(h('h2', { class: 'sum-title' }, t('summary')));
+  const res = S.result;
+  if (!res || !res.text) { box.append(h('p', { class: 'muted small' }, t('emptyBody'))); return; }
+  const r = res.report, { changes, warnings } = r.stats, target = S.opts.form;
+  box.append(h('div', { class: 'sum-tiles' },
+    h('div', { class: 'sum-tile fixed' }, h('b', {}, fmt(changes)), h('span', {}, t('sevFixed'))),
+    h('div', { class: 'sum-tile warn' }, h('b', {}, fmt(warnings)), h('span', {}, t('sevWarning')))));
+  const ls = h('div', {}, h('div', { class: 'sum-h' }, h('span', {}, t('lettersTitle')), h('span', {}, t('singleSplit'))));
+  for (const [key, L] of Object.entries(LETTERS)) {
+    const a = r.letters.in[key], { st, label } = letterStatus(a, target);
+    ls.append(h('div', { class: 'sum-letter' }, h('span', { class: 'sg', lang: 'bn', 'aria-hidden': 'true' }, L.pre),
+      h('span', { class: `badge b-${st}` }, label), h('span', { class: 'sn' }, `${fmt(a.precomposed)} / ${fmt(a.decomposed)}`)));
+  }
+  box.append(ls);
+  const all = r.findings, byG = {};
+  for (const f of all) byG[f.group] = (byG[f.group] || 0) + 1;
+  if (all.length) {
+    const cat = h('div', {}, h('div', { class: 'sum-h' }, h('span', {}, t('byGroup'))));
+    const max = Math.max(...Object.values(byG));
+    for (const g of GROUPS) {
+      if (!byG[g.id]) continue;
+      const bar = h('i'); bar.style.background = GROUP_COLOR[g.id]; bar.style.width = `${Math.max(6, (byG[g.id] / max) * 100)}%`;
+      cat.append(h('div', { class: 'sum-cat' }, h('span', {}, gname(g.id)), h('b', {}, fmt(byG[g.id])), bar));
+    }
+    box.append(cat);
+    const top = h('div', {}, h('div', { class: 'sum-h' }, h('span', {}, t('topFindings'))));
+    const groups = new Map();
+    all.forEach((f, i) => { const g = groups.get(f.ruleId) || { f, i, n: 0 }; g.n++; groups.set(f.ruleId, g); });
+    [...groups.values()].sort((x, y) => (x.f.severity === 'warning') - (y.f.severity === 'warning') || y.n - x.n).slice(0, 6).forEach(({ f, i, n }) => {
+      top.append(h('button', { class: 'sum-item', type: 'button', onclick: () => jumpTo(i) },
+        h('span', { class: 'fsev ' + f.severity }, SEV_ICON[f.severity]),
+        h('span', {}, ruleLabel(f.ruleId, S.lang), n > 1 ? h('b', { style: 'margin-left:6px;color:var(--ink-2)' }, `×${fmt(n)}`) : null)));
+    });
+    box.append(top, h('button', { class: 'btn sm sum-all', type: 'button', onclick: () => { switchTab('findings'); $('p-findings').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); } }, t('viewAll', all.length)));
+  } else box.append(h('p', { class: 'muted small' }, t('noIssues')));
+}
 function renderLetters() {
   const r = S.result.report, target = S.opts.form;
   for (const key of Object.keys(LETTERS)) {
     const ref = LREF[key], a = r.letters.in[key], b = r.letters.out[key];
     const total = a.precomposed + a.decomposed;
-    let st = 'none', label = t('badgeNone');
-    if (total) {
-      if (a.precomposed && a.decomposed) { st = 'mixed'; label = t('badgeMixed'); }
-      else if ((target === 'precomposed') === !!a.precomposed) { st = 'consistent'; label = t('badgeConsistent'); }
-      else if (a.decomposed) { st = 'split'; label = t('badgeSplit'); }
-      else { st = 'split'; label = t('badgeSingle'); }
-    }
+    const { st, label } = letterStatus(a, target);
     ref.card.className = `card lcard st-${st === 'none' ? 'none' : st}`;
     ref.badge.className = `badge b-${st}`; ref.badge.textContent = label;
     ref.pre.style.setProperty('flex-grow', total ? a.precomposed : 0);
@@ -601,7 +640,7 @@ function currentHash(withText) {
 function renderAll() {
   const r = S.result;
   $('output').value = r.output;
-  renderEmpty(); renderStats(); renderStatus(); renderLetters(); renderFindings();
+  renderEmpty(); renderStats(); renderStatus(); renderLetters(); renderFindings(); renderSummary();
   S.dirty = { hl: 1, diff: 1, inv: 1, code: 1 };
   if (!$('hlView').hidden) renderHighlight();
   if (!$('diffView').hidden) renderDiff();

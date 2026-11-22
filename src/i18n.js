@@ -1,6 +1,6 @@
 export const STR = {
   en: {
-    appName: 'BanglaNorm', skip: 'Skip to content',
+    appName: 'BanglaNorm', summary: 'Summary', topFindings: 'Top findings', viewAll: (n) => `View all ${n} findings`, singleSplit: 'single / split', skip: 'Skip to content',
     tagline: "Normalize Bangla Unicode text",
     sub: "Some Bangla letters can be stored in more than one way, which quietly breaks search and matching. Paste your text, see what is inconsistent, and copy the corrected version.",
     privacy: "Runs in your browser. Your text is never uploaded.",
@@ -59,7 +59,7 @@ export const STR = {
     stepTitle: 'How it works', step1: "Paste", step1d: "Text from Word, a database, a chat app, anywhere.", step2: "Review", step2d: "Each problem is highlighted with its exact code points.", step3: "Copy", step3d: "Use the cleaned text in your database, search index or documents.",
   },
   bn: {
-    appName: 'বাংলানর্ম', skip: 'মূল অংশে যান',
+    appName: 'বাংলানর্ম', summary: 'সারসংক্ষেপ', topFindings: 'প্রধান ফলাফল', viewAll: (n) => `${n}টি ফলাফলই দেখুন`, singleSplit: 'একক / ভাঙা', skip: 'মূল অংশে যান',
     tagline: "বাংলা ইউনিকোড নরমালাইজার",
     sub: "বাংলার কিছু অক্ষর একাধিক উপায়ে সংরক্ষিত হতে পারে, যার ফলে সার্চ ও মেলানো নীরবে ভুল করে। লেখা পেস্ট করুন, কোথায় অসংগতি আছে দেখুন, আর ঠিক করা লেখা কপি করুন।",
     privacy: "ব্রাউজারেই চলে। আপনার লেখা কোথাও আপলোড হয় না।",
