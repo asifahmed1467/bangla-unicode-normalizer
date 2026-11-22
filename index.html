@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en" data-theme="system">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BanglaNorm — Bangla Unicode normalizer (ড় ঢ় য় fixer)</title>
+  <meta name="description" content="Free, private, in-browser tool that fixes Bangla Unicode: ড় ঢ় য় single vs base+nukta forms, invisible characters, look-alikes and more.">
+  <meta name="theme-color" content="#0a7e6e">
+  <meta property="og:title" content="BanglaNorm — Bangla Unicode normalizer">
+  <meta property="og:description" content="Detect and fix inconsistent Bangla Unicode. 100% client-side, free, offline-ready.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preload" href="fonts/noto-sans-bengali.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="./" aria-label="BanglaNorm">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M9 20.5c3.2 3.4 9.6 3.4 13.6-.9M16 7v8.5m0-4.5c2.6-2.2 5.2-.6 5.2 1.7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="25.5" r="1.7" fill="#fff"/></svg>
+      <span class="brand-name" data-i18n="appName">BanglaNorm</span>
+    </a>
+    <nav class="top-actions" aria-label="Site">
+      <button class="btn ghost" id="sampleBtn" type="button"><span data-i18n="sample">Load sample</span></button>
+      <button class="btn ghost icon" id="langBtn" type="button" aria-label="Language"><span id="langLabel">বাং</span></button>
+      <button class="btn ghost icon" id="themeBtn" type="button" aria-label="Theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"></svg>
+      </button>
+      <button class="btn ghost icon" id="helpBtn" type="button" aria-label="Keyboard shortcuts">?</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="h1">
+    <div class="hero-glyphs" aria-hidden="true">
+      <span class="g g1" lang="bn">&#x09DC;</span><span class="g g2" lang="bn">&#x09DD;</span><span class="g g3" lang="bn">&#x09DF;</span>
+    </div>
+    <h1 id="h1" data-i18n="tagline">Fix Bangla Unicode in one click</h1>
+    <p class="hero-sub" data-i18n="sub"></p>
+    <div class="hero-badges">
+      <span class="pill ok"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4L11 13.2l4.6-4.6L17 10l-6 6Z" fill="currentColor"/></svg><span data-i18n="privacy"></span></span>
+      <span class="pill" id="offlinePill" hidden data-i18n="offline"></span>
+    </div>
+  </section>
+
+  <section class="card toolbar" aria-label="Controls">
+    <div class="field">
+      <span class="label" id="formLbl" data-i18n="formLabel">Write ড় ঢ় য় as</span>
+      <div class="seg" role="radiogroup" aria-labelledby="formLbl" id="formSeg">
+        <label class="seg-opt"><input type="radio" name="form" value="precomposed" checked><span class="seg-body"><b lang="bn" class="seg-glyph">&#x09DF;</b><span><span class="seg-t" data-i18n="formPre"></span><small data-i18n="formPreHint"></small></span></span></label>
+        <label class="seg-opt"><input type="radio" name="form" value="decomposed"><span class="seg-body"><b lang="bn" class="seg-glyph">&#x09AF;&#x09BC;</b><span><span class="seg-t" data-i18n="formDec"></span><small data-i18n="formDecHint"></small></span></span></label>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label" for="preset" data-i18n="preset">Preset</label>
+      <select id="preset" class="select">
+        <option value="recommended" data-i18n="presetRecommended"></option>
+        <option value="strict" data-i18n="presetStrict"></option>
+        <option value="minimal" data-i18n="presetMinimal"></option>
+        <option value="aggressive" data-i18n="presetAggressive"></option>
+        <option value="custom" data-i18n="presetCustom" hidden></option>
+      </select>
+    </div>
+    <div class="toolbar-end">
+      <label class="switch" title="Live mode"><input type="checkbox" id="liveToggle" checked><span class="track"><span class="thumb"></span></span><span data-i18n="live">Live</span></label>
+      <button class="btn" id="optionsBtn" type="button"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2m4 0h10M14 4v6m-4 4v6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span data-i18n="options">Options</span></button>
+      <button class="btn primary" id="normalizeBtn" type="button"><span data-i18n="normalize">Normalize</span><kbd class="kbd">Ctrl ↵</kbd></button>
+    </div>
+  </section>
+
+  <section class="editors" id="dropZone">
+    <article class="card pane" id="paneIn">
+      <header class="pane-head">
+        <h2 class="pane-title" data-i18n="input">Input</h2>
+        <div class="tabs mini" role="tablist" aria-label="Input view">
+          <button role="tab" class="tab" id="tabEdit" aria-selected="true" data-i18n="edit">Edit</button>
+          <button role="tab" class="tab" id="tabHl" aria-selected="false"><span data-i18n="highlight">Highlight</span></button>
+        </div>
+        <div class="pane-actions">
+          <button class="btn ghost sm" id="undoBtn" type="button" disabled data-i18n="undo">Undo</button>
+          <button class="btn ghost sm" id="redoBtn" type="button" disabled data-i18n="redo">Redo</button>
+          <button class="btn ghost sm" id="pasteBtn" type="button" data-i18n="paste">Paste</button>
+          <button class="btn ghost sm" id="uploadBtn" type="button" data-i18n="upload">Upload</button>
+          <button class="btn ghost sm" id="clearBtn" type="button" data-i18n="clear">Clear</button>
+        </div>
+      </header>
+      <div class="pane-body">
+        <textarea id="input" class="area bn" spellcheck="false" autocomplete="off" lang="bn" aria-label="Input text"></textarea>
+        <div id="hlView" class="area bn hl" tabindex="0" hidden></div>
+        <div class="empty" id="emptyIn">
+          <div class="empty-art" aria-hidden="true" lang="bn">&#x09DC;&#x09DD;&#x09DF;</div>
+          <b data-i18n="emptyTitle"></b>
+          <p data-i18n="emptyBody"></p>
+          <button class="btn primary" id="emptySample" type="button" data-i18n="try">Try a sample</button>
+        </div>
+        <div class="dropmask" aria-hidden="true"><span data-i18n="dropHere"></span></div>
+      </div>
+      <footer class="pane-foot" id="statsIn"></footer>
+    </article>
+
+    <article class="card pane" id="paneOut">
+      <header class="pane-head">
+        <h2 class="pane-title" data-i18n="output">Output</h2>
+        <div class="tabs mini" role="tablist" aria-label="Output view">
+          <button role="tab" class="tab" id="tabOutText" aria-selected="true" data-i18n="text">Text</button>
+          <button role="tab" class="tab" id="tabOutDiff" aria-selected="false" data-i18n="diff">Diff</button>
+        </div>
+        <div class="pane-actions">
+          <button class="btn ghost sm" id="swapBtn" type="button" data-i18n="swap">Use as input</button>
+          <button class="btn ghost sm" id="downloadBtn" type="button" data-i18n="download">Download</button>
+          <button class="btn sm primary" id="copyBtn" type="button"><span data-i18n="copy">Copy</span></button>
+        </div>
+      </header>
+      <div class="pane-body">
+        <textarea id="output" class="area bn out" readonly spellcheck="false" lang="bn" aria-label="Output text"></textarea>
+        <div id="diffView" class="area bn hl" tabindex="0" hidden></div>
+        <div class="empty slim" id="emptyOut"><b data-i18n="outputEmpty"></b></div>
+      </div>
+      <footer class="pane-foot" id="statsOut"></footer>
+    </article>
+  </section>
+
+  <div id="statusStrip" class="status" role="status" aria-live="polite"></div>
+
+  <section class="letters-sec" aria-labelledby="lettersH">
+    <div class="sec-head">
+      <div>
+        <h2 id="lettersH" data-i18n="lettersTitle">Detected letters</h2>
+        <p class="muted" data-i18n="lettersSub"></p>
+      </div>
+      <p class="muted small" data-i18n="letterNote"></p>
+    </div>
+    <div class="letters" id="letters"></div>
+  </section>
+
+  <section class="card results" aria-label="Details">
+    <div class="tabs big" role="tablist" aria-label="Details" id="mainTabs">
+      <button role="tab" class="tab" id="t-findings" aria-selected="true" aria-controls="p-findings"><span data-i18n="tabFindings">Findings</span> <span class="count" id="findingsCount">0</span></button>
+      <button role="tab" class="tab" id="t-inspector" aria-selected="false" aria-controls="p-inspector" data-i18n="tabInspector">Inspector</button>
+      <button role="tab" class="tab" id="t-inventory" aria-selected="false" aria-controls="p-inventory" data-i18n="tabInventory">Characters</button>
+      <button role="tab" class="tab" id="t-compare" aria-selected="false" aria-controls="p-compare" data-i18n="tabCompare">Compare</button>
+      <button role="tab" class="tab" id="t-code" aria-selected="false" aria-controls="p-code" data-i18n="tabCode">Code</button>
+    </div>
+
+    <div class="panel" id="p-findings" role="tabpanel" aria-labelledby="t-findings">
+      <div class="findings-grid">
+        <div class="chart-box">
+          <h3 class="h3" data-i18n="byGroup">By category</h3>
+          <div id="donut" class="donut"></div>
+          <ul id="legend" class="legend"></ul>
+        </div>
+        <div>
+          <div class="filters">
+            <div class="chips" id="sevChips" role="group" aria-label="Severity"></div>
+            <input type="search" id="findSearch" class="input" data-i18n-ph="search" placeholder="Search findings…">
+          </div>
+          <ul id="findingsList" class="flist"></ul>
+          <button class="btn ghost" id="moreBtn" type="button" hidden data-i18n="showMore">Show more</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="p-inspector" role="tabpanel" aria-labelledby="t-inspector" hidden>
+      <h3 class="h3" data-i18n="inspectorTitle"></h3>
+      <p class="muted" data-i18n="inspectorHint"></p>
+      <label class="label" for="inspectIn" data-i18n="inspectIn"></label>
+      <input id="inspectIn" class="input bn" lang="bn" autocomplete="off" spellcheck="false">
+      <div id="inspectOut" class="inspect-out"></div>
+    </div>
+
+    <div class="panel" id="p-inventory" role="tabpanel" aria-labelledby="t-inventory" hidden>
+      <div class="filters">
+        <div class="chips" id="invSource" role="group"></div>
+        <input type="search" id="invFilter" class="input" data-i18n-ph="filter" placeholder="Filter…">
+        <label class="check"><input type="checkbox" id="invInvisible"> <span data-i18n="invisibleOnly"></span></label>
+      </div>
+      <div class="table-wrap"><table class="table" id="invTable"></table></div>
+    </div>
+
+    <div class="panel" id="p-compare" role="tabpanel" aria-labelledby="t-compare" hidden>
+      <h3 class="h3" data-i18n="compareTitle"></h3>
+      <p class="muted" data-i18n="compareHint"></p>
+      <div class="cmp-grid">
+        <div><label class="label" for="cmpA" data-i18n="strA"></label><textarea id="cmpA" class="area bn short" lang="bn" spellcheck="false"></textarea></div>
+        <div><label class="label" for="cmpB" data-i18n="strB"></label><textarea id="cmpB" class="area bn short" lang="bn" spellcheck="false"></textarea></div>
+      </div>
+      <div id="cmpOut" class="cmp-out" role="status"></div>
+    </div>
+
+    <div class="panel" id="p-code" role="tabpanel" aria-labelledby="t-code" hidden>
+      <h3 class="h3" data-i18n="codeTitle"></h3>
+      <div class="chips" id="codeSrc" role="group"></div>
+      <div id="codeOut" class="code-list"></div>
+    </div>
+  </section>
+
+  <section class="steps" aria-labelledby="stepsH">
+    <h2 id="stepsH" class="sr-only" data-i18n="stepTitle"></h2>
+    <div class="step"><span class="n">1</span><div><b data-i18n="step1"></b><p data-i18n="step1d"></p></div></div>
+    <div class="step"><span class="n">2</span><div><b data-i18n="step2"></b><p data-i18n="step2d"></p></div></div>
+    <div class="step"><span class="n">3</span><div><b data-i18n="step3"></b><p data-i18n="step3d"></p></div></div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p data-i18n="footerPrivacy"></p>
+  <p class="muted small"><span id="version">v1.0.0</span> · <span data-i18n="license"></span> · <span data-i18n="footerRefs"></span> · <a href="https://github.com/" id="bugLink" rel="noopener" data-i18n="footerBug"></a></p>
+</footer>
+
+<div class="backdrop" id="backdrop" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Options" aria-hidden="true" tabindex="-1">
+  <header class="drawer-head">
+    <div><h2 data-i18n="optionsTitle"></h2><p class="muted small" data-i18n="optionsSub"></p></div>
+    <button class="btn ghost icon" id="drawerClose" type="button" aria-label="Close">✕</button>
+  </header>
+  <div class="drawer-body" id="optionList"></div>
+  <footer class="drawer-foot">
+    <div class="share">
+      <b data-i18n="share"></b>
+      <label class="check"><input type="checkbox" id="shareText"> <span data-i18n="shareText"></span></label>
+      <p class="warn-text small" id="shareWarn" hidden data-i18n="shareWarn"></p>
+      <div class="row"><button class="btn sm" id="copyLinkBtn" type="button" data-i18n="copyLink"></button><button class="btn ghost sm" id="resetBtn" type="button" data-i18n="reset"></button></div>
+    </div>
+  </footer>
+</aside>
+
+<dialog id="helpDlg" class="dlg" aria-labelledby="helpTitle">
+  <form method="dialog">
+    <h2 id="helpTitle" data-i18n="shortcutsTitle"></h2>
+    <dl class="keys">
+      <dt><kbd>Ctrl</kbd> <kbd>↵</kbd></dt><dd data-i18n="scNormalize"></dd>
+      <dt><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>C</kbd></dt><dd data-i18n="scCopy"></dd>
+      <dt><kbd>Ctrl</kbd> <kbd>K</kbd></dt><dd data-i18n="scFind"></dd>
+      <dt><kbd>?</kbd></dt><dd data-i18n="scHelp"></dd>
+    </dl>
+    <button class="btn primary" data-i18n="close"></button>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<input type="file" id="fileIn" accept=".txt,.md,.csv,.json,.srt,text/plain" hidden>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
